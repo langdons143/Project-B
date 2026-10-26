@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.AI.Navigation;
 
 public class MazeGenerator : MonoBehaviour
 {
@@ -23,6 +24,13 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private GameObject _coinPrefab;
     [SerializeField] private int _coinCount = 10;
 
+    [Header("NavMesh")]
+    [SerializeField] private NavMeshSurface navMeshSurface;
+
+    [Header("Enemy Generation")]
+    [SerializeField] private GameObject _enemyPrefab;
+    [SerializeField] private int _enemyCount = 3;
+
     private MazeCell[,] _mazeGrid;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -35,12 +43,24 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int z = 0; z < _mazeDepth; z++)
             {
-                _mazeGrid[x, z] = Instantiate(_mazeCellPrefab, new Vector3(x * _cellSize, 0, z * _cellSize), Quaternion.identity, transform);
+                _mazeGrid[x, z] = Instantiate(
+                    _mazeCellPrefab,
+                    new Vector3(x * _cellSize, 0, z * _cellSize),
+                    Quaternion.identity,
+                    transform
+                );
             }
         }
 
+        // Generate the maze and remove walls
         GenerateMaze(null, _mazeGrid[0, 0]);
+
+        // Build NavMesh after maze generation is complete
+        navMeshSurface.BuildNavMesh();
+
+        // Spawn collectibles
         SpawnCoins();
+        SpawnEnemies();
     }
 
     private void GenerateMaze(MazeCell previousCell, MazeCell currentCell)
@@ -154,38 +174,72 @@ public class MazeGenerator : MonoBehaviour
     }
 
     private void SpawnCoins()
-{
-    List<MazeCell> availableCells = new List<MazeCell>();
-
-    for (int x = 0; x < _mazeWidth; x++)
     {
-        for (int z = 0; z < _mazeDepth; z++)
-        {
-            // Skip the starting cell
-            if (x == 0 && z == 0)
-                continue;
+        List<MazeCell> availableCells = new List<MazeCell>();
 
-            availableCells.Add(_mazeGrid[x, z]);
+        for (int x = 0; x < _mazeWidth; x++)
+        {
+            for (int z = 0; z < _mazeDepth; z++)
+            {
+                // Skip the starting cell
+                if (x == 0 && z == 0)
+                    continue;
+
+                availableCells.Add(_mazeGrid[x, z]);
+            }
+        }
+
+        int coinsToSpawn = Mathf.Min(_coinCount, availableCells.Count);
+
+        for (int i = 0; i < coinsToSpawn; i++)
+        {
+            int randomIndex = Random.Range(0, availableCells.Count);
+
+            MazeCell selectedCell = availableCells[randomIndex];
+
+            Vector3 spawnPosition = selectedCell.transform.position
+                + Vector3.up * 1f;
+
+            Instantiate(_coinPrefab, spawnPosition,
+                Quaternion.identity, transform);
+
+            availableCells.RemoveAt(randomIndex);
         }
     }
 
-    int coinsToSpawn = Mathf.Min(_coinCount, availableCells.Count);
-
-    for (int i = 0; i < coinsToSpawn; i++)
+    private void SpawnEnemies()
     {
-        int randomIndex = Random.Range(0, availableCells.Count);
+        List<MazeCell> availableCells = new List<MazeCell>();
 
-        MazeCell selectedCell = availableCells[randomIndex];
+        for (int x = 0; x < _mazeWidth; x++)
+        {
+            for (int z = 0; z < _mazeDepth; z++)
+            {
+                // Skip the starting cell
+                if (x == 0 && z == 0)
+                    continue;
 
-        Vector3 spawnPosition = selectedCell.transform.position
-            + Vector3.up * 1f;
+                availableCells.Add(_mazeGrid[x, z]);
+            }
+        }
 
-        Instantiate(_coinPrefab, spawnPosition,
-            Quaternion.identity, transform);
+        int enemiesToSpawn = Mathf.Min(_enemyCount, availableCells.Count);
 
-        availableCells.RemoveAt(randomIndex);
+        for (int i = 0; i < enemiesToSpawn; i++)
+        {
+            int randomIndex = Random.Range(0, availableCells.Count);
+
+            MazeCell selectedCell = availableCells[randomIndex];
+
+            Vector3 spawnPosition = selectedCell.transform.position
+                + Vector3.up * 1f;
+
+            Instantiate(_enemyPrefab, spawnPosition,
+                Quaternion.identity, transform);
+
+            availableCells.RemoveAt(randomIndex);
+        }
     }
-}
 
     // Update is called once per frame
     void Update()

@@ -6,43 +6,60 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class Damage : MonoBehaviour
 {
-    public PlayerHealth playerHealth ;
+    public PlayerHealth playerHealth;
     public float damage;
+
     AudioManager audioManager;
 
     private void Awake()
     {
-        GameObject audioObject = GameObject.FindGameObjectWithTag("Audio");
-        if (audioObject != null)
-        {
-            audioManager = audioObject.GetComponent<AudioManager>();
-        }
+        audioManager = AudioManager.instance;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (playerHealth.health <= 0)
-        {
-            Destroy(gameObject); // Destroy the enemy object when player health reaches 0
-            audioManager.PlaySFX(audioManager.onDeath);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
-        }
+        // Don't check player death here anymore.
+        // We'll handle death when the bullet hits.
     }
 
-    private void OnCollisionEnter(Collision other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        // Check if bullet hit the player
+        PlayerHealth hitPlayer =
+            other.GetComponentInParent<PlayerHealth>();
+
+        if (hitPlayer != null)
         {
-            playerHealth.health -= damage;
-            audioManager.PlaySFX(audioManager.damage);
+            // Damage player
+            hitPlayer.health -= damage;
+
+            if (audioManager != null)
+            {
+                audioManager.PlaySFX(audioManager.damage);
+            }
+
+            // Check if player died
+            if (hitPlayer.health <= 0)
+            {
+                if (audioManager != null)
+                {
+                    audioManager.PlaySFX(audioManager.onDeath);
+                }
+
+                SceneManager.LoadScene(
+                    SceneManager.GetActiveScene().name);
+            }
+
+            Destroy(gameObject);
+        }
+        else if (!other.isTrigger)
+        {
+            // Destroy bullet when it hits a wall
+            Destroy(gameObject);
         }
     }
-
 }

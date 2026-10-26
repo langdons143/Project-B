@@ -43,16 +43,12 @@ public class PlayerMovement : MonoBehaviour
 
     AudioManager audioManager;
 
-    /*
+    
     private void Awake()
     {
-        GameObject audioObject = GameObject.FindGameObjectWithTag("Audio");
-        if (audioObject != null)
-        {
-            audioManager = audioObject.GetComponent<AudioManager>();
-        }
+        audioManager = AudioManager.instance;
     }
-    */
+    
 
     public MovementState state;
     public enum MovementState
@@ -76,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
         // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.1f, whatIsGround);
 
-        // Debug Line to Check where its detecting the ground
+        // Debug Line to Check where its detecting the ground (REALLY HELPS)
         Debug.DrawRay(
             transform.position,
             Vector3.down * (playerHeight * 0.5f + 0.1f),
@@ -99,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
             rb.linearDamping = 0f;
         }
 
-        Debug.Log(grounded);
+        Debug.Log("Grounded: " + grounded + " | Ready to Jump: " + readyToJump);
 
     }
 
@@ -114,7 +110,7 @@ public class PlayerMovement : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
-        Debug.Log("Horizontal: " + horizontalInput + " Vertical: " + verticalInput);
+        // Debug.Log("Horizontal: " + horizontalInput + " Vertical: " + verticalInput);
 
         // when to jump
         if (Input.GetKey(jumpKey) && readyToJump && grounded)
@@ -181,6 +177,11 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+
+        if (audioManager != null)
+        {
+            audioManager.PlaySFX(audioManager.Jump);
+        }
     }
 
     private void ResetJump()

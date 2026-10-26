@@ -35,13 +35,13 @@ public class MainMenu : MonoBehaviour
 
     public void Credits()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(3);
         audioManager.PlaySFX(audioManager.buttonClick);
     }
 
     public void Options()
     {
-        SceneManager.LoadScene(3);
+        SceneManager.LoadScene(2);
         audioManager.PlaySFX(audioManager.buttonClick);
     }
 

@@ -9,7 +9,16 @@ EditorBuildSettings:
     path: Assets/Scenes/TitleCard.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/MainGame.unity
+    path: Assets/Scenes/MainGame.unity
     guid: cf518a1e5945a0a44a9ff54a25c1e175
+  - enabled: 1
+    path: Assets/Scenes/OptionsMenu.unity
+    guid: d8fd07edb210fa147ab40263f632ead6
+  - enabled: 1
+    path: Assets/CreditsMenu.unity
+    guid: 13d85bacb9652834dbd3279557b79f14
+  - enabled: 1
+    path: Assets/EndingMenu.unity
+    guid: d1cfa9a3d2007ae419718e19582d814e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
